@@ -1,0 +1,72 @@
+name: osrm-server
+
+volumes:
+  osrm-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./local_data
+      o: bind
+
+services:
+  osrm-nginx:
+    image: nginx:1.27.3-perl
+    container_name: osrm-nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "5000:5000"
+    depends_on:
+      - osrm-backend-car
+      - osrm-backend-bicycle
+      - osrm-backend-foot
+    networks:
+      - osrm-network
+
+  # Need separate containers and ports for each profile
+  osrm-backend-car:
+    image: ghcr.io/project-osrm/osrm-backend:v5.27.1
+    container_name: osrm-backend-car
+    restart: unless-stopped
+    command: osrm-routed -p 5001 --mmap --threads 4 --algorithm mld --max-matching-size 10000 "/data/car/cropped_network.osrm"
+    volumes:
+      - osrm-data:/data
+    ports:
+      - "5001:5001"
+    mem_limit: 8G
+    memswap_limit: 16G
+    networks:
+      - osrm-network
+
+  osrm-backend-bicycle:
+    image: ghcr.io/project-osrm/osrm-backend:v5.27.1
+    container_name: osrm-backend-bicycle
+    restart: unless-stopped
+    command: osrm-routed -p 5002 --mmap --threads 4 --algorithm mld --max-matching-size 10000 "/data/bicycle/cropped_network.osrm"
+    volumes:
+      - osrm-data:/data
+    ports:
+      - "5002:5002"
+    mem_limit: 8G
+    memswap_limit: 16G
+    networks:
+      - osrm-network
+
+  osrm-backend-foot:
+    image: ghcr.io/project-osrm/osrm-backend:v5.27.1
+    container_name: osrm-backend-foot
+    restart: unless-stopped
+    command: osrm-routed -p 5003 --mmap --threads 4 --algorithm mld --max-matching-size 10000 "/data/foot/cropped_network.osrm"
+    volumes:
+      - osrm-data:/data
+    ports:
+      - "5003:5003"
+    mem_limit: 8G
+    memswap_limit: 16G
+    networks:
+      - osrm-network
+
+networks:
+  osrm-network:
+    driver: bridge
+    name: osrm-network
