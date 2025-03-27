@@ -5,13 +5,14 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ./local_data
+      device: ./data
       o: bind
 
 services:
   osrm-nginx:
     image: nginx:1.27.3-perl
     container_name: osrm-nginx
+    restart: unless-stopped
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
     ports:
