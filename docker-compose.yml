@@ -43,7 +43,7 @@ services:
     image: ghcr.io/project-osrm/osrm-backend:v5.27.1
     container_name: osrm-backend-bicycle
     restart: unless-stopped
-    command: osrm-routed -p 5002 --mmap --threads 4 --algorithm mld --max-matching-size 10000 "/data/bicycle/cropped_network.osrm"
+    command: osrm-routed -p 5002 --mmap --threads 4 --algorithm mld --max-matching-size 10000 "/data/bicycle.uswest_wrongways/us-west-latest.osrm" # "/data/bicycle/cropped_network.osrm"
     volumes:
       - osrm-data:/data
     ports:
@@ -62,6 +62,19 @@ services:
       - osrm-data:/data
     ports:
       - "5003:5003"
+    mem_limit: 8G
+    memswap_limit: 16G
+    networks:
+      - osrm-network
+  osrm-backend-custom:
+    image: ghcr.io/project-osrm/osrm-backend:v6.0.0
+    container_name: osrm-backend-custom
+    restart: unless-stopped
+    command: osrm-routed -p 5004 --mmap --threads 4 --algorithm mld --max-matching-size 10000 "/data/custom_network/custom_network.osrm"
+    volumes:
+      - osrm-data:/data
+    ports:
+      - "5004:5004"
     mem_limit: 8G
     memswap_limit: 16G
     networks:
