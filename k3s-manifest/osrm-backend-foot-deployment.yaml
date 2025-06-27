@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f docker-compose.yml convert -o k3s-manifest
+    kompose.version: 1.36.0 (ae2a39403)
+  labels:
+    io.kompose.service: osrm-backend-foot
+  name: osrm-backend-foot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: osrm-backend-foot
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -f docker-compose.yml convert -o k3s-manifest
+        kompose.version: 1.36.0 (ae2a39403)
+      labels:
+        io.kompose.service: osrm-backend-foot
+    spec:
+      containers:
+        - args:
+            - osrm-routed
+            - -p
+            - "5003"
+            - --mmap
+            - --threads
+            - "4"
+            - --algorithm
+            - mld
+            - --max-matching-size
+            - "10000"
+            - /data/foot/cropped_network.osrm
+          image: ghcr.io/project-osrm/osrm-backend:v5.27.1
+          name: osrm-backend-foot
+          ports:
+            - containerPort: 5003
+              protocol: TCP
+          resources:
+            limits:
+              memory: "8589934592"
+          volumeMounts:
+            - mountPath: /data
+              name: osrm-data
+      restartPolicy: Always
+      volumes:
+        - name: osrm-data
+          persistentVolumeClaim:
+            claimName: osrm-data

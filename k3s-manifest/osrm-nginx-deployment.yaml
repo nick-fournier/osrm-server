@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f docker-compose.yml convert -o k3s-manifest
+    kompose.version: 1.36.0 (ae2a39403)
+  labels:
+    io.kompose.service: osrm-nginx
+  name: osrm-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: osrm-nginx
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -f docker-compose.yml convert -o k3s-manifest
+        kompose.version: 1.36.0 (ae2a39403)
+      labels:
+        io.kompose.service: osrm-nginx
+    spec:
+      containers:
+        - image: nginx:1.27.3-perl
+          name: osrm-nginx
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /etc/nginx/nginx.conf
+              name: osrm-nginx-cm0
+              subPath: nginx.conf
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+            name: osrm-nginx-cm0
+          name: osrm-nginx-cm0

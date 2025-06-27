@@ -1,0 +1,407 @@
+# ----------------- osrm-backend-bicycle -----------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: osrm-backend-bicycle
+  namespace: launchpad
+  labels:
+    io.kompose.service: osrm-backend-bicycle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: osrm-backend-bicycle
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: osrm-backend-bicycle
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: orange
+      containers:
+        - name: osrm-backend-bicycle
+          image: ghcr.io/project-osrm/osrm-backend:v5.27.1
+          args:
+            - osrm-routed
+            - -p
+            - "5002"
+            - --mmap
+            - --threads
+            - "4"
+            - --algorithm
+            - mld
+            - --max-matching-size
+            - "10000"
+            - /data/bicycle.uswest_wrongways/us-west-latest.osrm
+          ports:
+            - containerPort: 5002
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data
+              name: osrm-data
+      restartPolicy: Always
+      volumes:
+        - name: osrm-data
+          hostPath:
+            path: /home/nick/osrm-server/data
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: osrm-backend-bicycle
+  namespace: launchpad
+  labels:
+    io.kompose.service: osrm-backend-bicycle
+spec:
+  ports:
+    - name: "5002"
+      port: 5002
+      targetPort: 5002
+  selector:
+    io.kompose.service: osrm-backend-bicycle
+
+# ----------------- osrm-backend-car -----------------
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: osrm-backend-car
+  namespace: launchpad
+  labels:
+    io.kompose.service: osrm-backend-car
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: osrm-backend-car
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: osrm-backend-car
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: orange
+      containers:
+        - name: osrm-backend-car
+          image: ghcr.io/project-osrm/osrm-backend:v5.27.1
+          args:
+            - osrm-routed
+            - -p
+            - "5001"
+            - --mmap
+            - --threads
+            - "4"
+            - --algorithm
+            - mld
+            - --max-matching-size
+            - "10000"
+            - /data/car/cropped_network.osrm
+          ports:
+            - containerPort: 5001
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data
+              name: osrm-data
+      restartPolicy: Always
+      volumes:
+        - name: osrm-data
+          hostPath:
+            path: /home/nick/osrm-server/data
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: osrm-backend-car
+  namespace: launchpad
+  labels:
+    io.kompose.service: osrm-backend-car
+spec:
+  ports:
+    - name: "5001"
+      port: 5001
+      targetPort: 5001
+  selector:
+    io.kompose.service: osrm-backend-car
+
+# ----------------- osrm-backend-custom -----------------
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: osrm-backend-custom
+  namespace: launchpad
+  labels:
+    io.kompose.service: osrm-backend-custom
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: osrm-backend-custom
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: osrm-backend-custom
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: orange
+      containers:
+        - name: osrm-backend-custom
+          image: ghcr.io/project-osrm/osrm-backend:v6.0.0
+          args:
+            - osrm-routed
+            - -p
+            - "5004"
+            - --mmap
+            - --threads
+            - "4"
+            - --algorithm
+            - mld
+            - --max-matching-size
+            - "10000"
+            - /data/custom_network/custom_network.osrm
+          ports:
+            - containerPort: 5004
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data
+              name: osrm-data
+      restartPolicy: Always
+      volumes:
+        - name: osrm-data
+          hostPath:
+            path: /home/nick/osrm-server/data
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: osrm-backend-custom
+  namespace: launchpad
+  labels:
+    io.kompose.service: osrm-backend-custom
+spec:
+  ports:
+    - name: "5004"
+      port: 5004
+      targetPort: 5004
+  selector:
+    io.kompose.service: osrm-backend-custom
+
+# ----------------- osrm-backend-foot -----------------
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: osrm-backend-foot
+  namespace: launchpad
+  labels:
+    io.kompose.service: osrm-backend-foot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: osrm-backend-foot
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: osrm-backend-foot
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: orange
+      containers:
+        - name: osrm-backend-foot
+          image: ghcr.io/project-osrm/osrm-backend:v5.27.1
+          args:
+            - osrm-routed
+            - -p
+            - "5003"
+            - --mmap
+            - --threads
+            - "4"
+            - --algorithm
+            - mld
+            - --max-matching-size
+            - "10000"
+            - /data/foot/cropped_network.osrm
+          ports:
+            - containerPort: 5003
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data
+              name: osrm-data
+      restartPolicy: Always
+      volumes:
+        - name: osrm-data
+          hostPath:
+            path: /home/nick/osrm-server/data
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: osrm-backend-foot
+  namespace: launchpad
+  labels:
+    io.kompose.service: osrm-backend-foot
+spec:
+  ports:
+    - name: "5003"
+      port: 5003
+      targetPort: 5003
+  selector:
+    io.kompose.service: osrm-backend-foot
+
+# ----------------- osrm-nginx ConfigMap -----------------
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: osrm-nginx-cm0
+  namespace: launchpad
+  labels:
+    io.kompose.service: osrm-nginx
+  annotations:
+    use-subpath: "true"
+data:
+  nginx.conf: |
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        resolver 127.0.0.11 valid=30s;
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+        send_timeout 300s;
+
+        upstream osrm_car {
+            server osrm-backend-car:5001;
+        }
+
+        upstream osrm_bicycle {
+            server osrm-backend-bicycle:5002;
+        }
+
+        upstream osrm_foot {
+            server osrm-backend-foot:5003;
+        }
+
+        upstream osrm_custom {
+            server osrm-backend-custom:5004;
+        }
+
+        server {
+            listen 5000 default_server;
+            listen [::]:5000 default_server ipv6only=on;
+            large_client_header_buffers 8 256k;
+
+            location ~* .*/v1/.*\b(?:driving|drive|car|auto)\b.* {
+                proxy_pass http://osrm_car;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+            }
+
+            location ~* .*/v1/.*\b(?:bicycling|cycling|biking|bike|bicycle)\b.* {
+                proxy_pass http://osrm_bicycle;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+            }
+
+            location ~* .*/v1/.*\b(?:walk|walking|foot|pedestrian)\b.* {
+                proxy_pass http://osrm_foot;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+            }
+
+            location ~* .*/v1/.*\b(?:custom|customized)\b.* {
+                proxy_pass http://osrm_custom;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+            }
+
+            location / {
+                add_header Content-Type text/plain;
+                return 404 'Your request is bad and you should feel bad.';
+            }
+        }
+    }
+
+# ----------------- osrm-nginx Deployment & Service -----------------
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: osrm-nginx
+  namespace: launchpad
+  labels:
+    io.kompose.service: osrm-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: osrm-nginx
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: osrm-nginx
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: orange
+      containers:
+        - name: osrm-nginx
+          image: nginx:1.27.3-perl
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /etc/nginx/nginx.conf
+              name: osrm-nginx-cm0
+              subPath: nginx.conf
+      restartPolicy: Always
+      volumes:
+        - name: osrm-nginx-cm0
+          configMap:
+            name: osrm-nginx-cm0
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: osrm-nginx
+  namespace: launchpad
+  labels:
+    io.kompose.service: osrm-nginx
+spec:
+  ports:
+    - name: "5000"
+      port: 5000
+      targetPort: 5000
+  selector:
+    io.kompose.service: osrm-nginx
